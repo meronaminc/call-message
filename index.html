@@ -36,7 +36,7 @@ button.primary:hover { background: #333; }
     <div class="section-title">수신 정보 입력</div>
     <div class="field">
       <label>학교명</label>
-      <input type="text" id="school" placeholder="예: 명지가온유치원(부산)" />
+      <input type="text" id="school" placeholder="예: 지란초등학교" />
     </div>
     <div class="field">
       <label>담당자명</label>
@@ -97,7 +97,7 @@ function generate() {
 
   let lines = [];
   lines.push('안녕하세요.');
-  lines.push('아래 선생님께서 문의를 주셔서 유선 안내 한번 부탁드립니다.');
+  lines.push('아래 선생님께서 문의주셔서 전달드리오니 확인 부탁드립니다.');
   lines.push('');
   if (school) lines.push(`학교명 : ${school}`);
   if (contactName) lines.push(`담당자 : ${contactName}`);
