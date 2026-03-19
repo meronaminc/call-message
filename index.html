@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>전화 전달 메시지 생성기</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a1a; padding: 2rem 1rem; }
+.container { max-width: 640px; margin: 0 auto; }
+h2 { font-size: 18px; font-weight: 500; margin-bottom: 1.5rem; }
+.section { background: #fff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+.section-title { font-size: 12px; font-weight: 500; color: #888; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+.field { margin-bottom: 12px; }
+.field:last-child { margin-bottom: 0; }
+label { display: block; font-size: 13px; color: #555; margin-bottom: 4px; }
+input, textarea { width: 100%; font-size: 14px; border: 0.5px solid rgba(0,0,0,0.2); border-radius: 8px; padding: 8px 10px; background: #fafafa; color: #1a1a1a; font-family: inherit; outline: none; }
+textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
+input:focus, textarea:focus { border-color: rgba(0,0,0,0.4); background: #fff; }
+.btn-row { display: flex; gap: 8px; margin-top: 1rem; }
+button { flex: 1; padding: 10px; font-size: 14px; font-weight: 500; border-radius: 8px; cursor: pointer; border: 0.5px solid rgba(0,0,0,0.2); background: #f0f0ee; color: #1a1a1a; font-family: inherit; transition: background 0.15s; }
+button:hover { background: #e5e5e3; }
+button.primary { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+button.primary:hover { background: #333; }
+.output-box { background: #fafafa; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 8px; padding: 1rem; font-size: 14px; line-height: 1.8; white-space: pre-wrap; color: #1a1a1a; min-height: 80px; word-break: break-all; }
+.copy-btn { margin-top: 10px; width: 100%; }
+.badge { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 20px; background: #e6f4ec; color: #2d7a4f; margin-left: 8px; opacity: 0; transition: opacity 0.3s; }
+.badge.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>전화 전달 메시지 생성기</h2>
+
+  <div class="section">
+    <div class="section-title">수신 정보 입력</div>
+    <div class="field">
+      <label>학교명</label>
+      <input type="text" id="school" placeholder="예: 지란초등학교" />
+    </div>
+    <div class="field">
+      <label>담당자명</label>
+      <input type="text" id="contact_name" placeholder="예: 홍길동 선생님" />
+    </div>
+    <div class="field">
+      <label>연락처</label>
+      <input type="text" id="phone" placeholder="예: 051-609-1525" oninput="formatPhone(this)" maxlength="13" />
+    </div>
+    <div class="field">
+      <label>이메일</label>
+      <input type="text" id="email" placeholder="예: gaon2022@korea.kr" />
+    </div>
+    <div class="field">
+      <label>문의 내용</label>
+      <textarea id="inquiry" placeholder="예: 관리자 계정 관련 문의"></textarea>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="primary" onclick="generate()">메시지 생성</button>
+    <button onclick="resetAll()">초기화</button>
+  </div>
+
+  <div class="section" id="result-section" style="margin-top: 1rem; display: none;">
+    <div class="section-title">생성된 메시지</div>
+    <div class="output-box" id="output"></div>
+    <button class="copy-btn" onclick="copyMsg()">복사하기 <span class="badge" id="copy-badge">복사됨</span></button>
+  </div>
+</div>
+
+<script>
+function formatPhone(el) {
+  let v = el.value.replace(/\D/g, '');
+  if (v.startsWith('02')) {
+    if (v.length <= 9) v = v.replace(/(\d{2})(\d{0,4})(\d{0,4})/, (_, a, b, c) => [a, b, c].filter(Boolean).join('-'));
+    else v = v.replace(/(\d{2})(\d{4})(\d{0,4})/, (_, a, b, c) => [a, b, c].filter(Boolean).join('-'));
+  } else {
+    if (v.length <= 10) v = v.replace(/(\d{3})(\d{0,3})(\d{0,4})/, (_, a, b, c) => [a, b, c].filter(Boolean).join('-'));
+    else v = v.replace(/(\d{3})(\d{4})(\d{0,4})/, (_, a, b, c) => [a, b, c].filter(Boolean).join('-'));
+  }
+  el.value = v;
+}
+
+function getVal(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
+
+function generate() {
+  const school = getVal('school');
+  const contactName = getVal('contact_name');
+  const phone = getVal('phone');
+  const email = getVal('email');
+  const inquiry = getVal('inquiry');
+
+  if (!school && !phone && !inquiry) {
+    alert('학교명, 연락처, 문의 내용 중 하나 이상 입력해 주세요.');
+    return;
+  }
+
+  let lines = [];
+  lines.push('안녕하세요.');
+  lines.push('아래 선생님께서 문의주셔서 전달드리오니 확인 부탁드립니다.');
+  lines.push('');
+  if (school) lines.push(`학교명 : ${school}`);
+  if (contactName) lines.push(`담당자 : ${contactName}`);
+  if (phone) lines.push(`연락처 : ${phone}`);
+  if (email) lines.push(`이메일 : ${email}`);
+  if (inquiry) lines.push(`문의 : ${inquiry}`);
+  lines.push('');
+  lines.push('감사합니다.');
+
+  document.getElementById('output').textContent = lines.join('\n');
+  const sec = document.getElementById('result-section');
+  sec.style.display = 'block';
+  sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function copyMsg() {
+  const text = document.getElementById('output').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const badge = document.getElementById('copy-badge');
+    badge.classList.add('show');
+    setTimeout(() => badge.classList.remove('show'), 2000);
+  });
+}
+
+function resetAll() {
+  ['school', 'contact_name', 'phone', 'email', 'inquiry'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('result-section').style.display = 'none';
+}
+</script>
+</body>
+</html>
